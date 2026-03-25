@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LoRaWAN Relay Visual Planner</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <header class="hero">
+      <div>
+        <p class="eyebrow">Local planning tool</p>
+        <h1>LoRaWAN Relay Visual Planner</h1>
+        <p class="subtitle">
+          Compare KONA Macro and Mega, change terrain and antenna assumptions, and visualize
+          device, relay, and gateway coverage as concentric range rings.
+        </p>
+      </div>
+      <div class="hero-stats">
+        <div class="stat-card">
+          <span>Limiting link</span>
+          <strong id="limitingLegBadge">Gateway only</strong>
+        </div>
+        <div class="stat-card">
+          <span>Design target</span>
+          <strong id="designTargetBadge">0 dB</strong>
+        </div>
+        <div class="stat-card">
+          <span>Estimated total reach</span>
+          <strong id="totalReachBadge">0 km</strong>
+        </div>
+      </div>
+    </header>
+
+    <main class="layout">
+      <section class="controls-panel card">
+        <div class="section-title-row">
+          <h2>Core assumptions</h2>
+          <button id="resetBtn" class="ghost-btn">Reset</button>
+        </div>
+
+        <div class="control-block">
+          <label class="block-label">Region</label>
+          <div class="chip-group" id="regionGroup">
+            <button class="chip active" data-region="EU868">EU868</button>
+            <button class="chip" data-region="US915">US915</button>
+          </div>
+        </div>
+
+        <div class="control-block">
+          <label class="block-label">Gateway model</label>
+          <div class="chip-group" id="gatewayGroup">
+            <button class="chip active" data-gateway="Macro">KONA Macro</button>
+            <button class="chip" data-gateway="Mega">KONA Mega</button>
+          </div>
+        </div>
+
+        <div class="control-block">
+          <label class="block-label">Terrain profile</label>
+          <div class="chip-group wrap" id="terrainGroup">
+            <button class="chip active" data-terrain="open">Open rural</button>
+            <button class="chip" data-terrain="suburban">Suburban</button>
+            <button class="chip" data-terrain="urban">Urban / industrial</button>
+            <button class="chip" data-terrain="dense">Dense obstruction</button>
+          </div>
+        </div>
+
+        <div class="control-block">
+          <label class="block-label">Topology</label>
+          <div class="toggle-row">
+            <span>Gateway</span>
+            <label class="switch">
+              <input id="useRelayToggle" type="checkbox" />
+              <span class="slider"></span>
+            </label>
+            <span>Gateway + Relay</span>
+          </div>
+          <p class="toggle-help" id="relayModeLabel">Gateway only: using direct gateway-to-device terrain model.</p>
+        </div>
+
+        <div class="grid two-up">
+          <label class="input-card">
+            <span>Gateway antenna height</span>
+            <input id="gatewayHeight" type="range" min="5" max="80" value="30" step="1" />
+            <strong><span id="gatewayHeightValue">30</span> m</strong>
+          </label>
+          <label class="input-card relay-only">
+            <span>Relay antenna height</span>
+            <input id="relayHeight" type="range" min="1" max="25" value="6" step="1" />
+            <strong><span id="relayHeightValue">6</span> m</strong>
+          </label>
+          <label class="input-card">
+            <span>End-device height</span>
+            <input id="deviceHeight" type="range" min="0.5" max="8" step="0.5" value="1.5" />
+            <strong><span id="deviceHeightValue">1.5</span> m</strong>
+          </label>
+          <label class="input-card relay-only">
+            <span>Relay placement</span>
+            <input id="relayPlacement" type="range" min="20" max="80" value="50" step="1" />
+            <strong><span id="relayPlacementValue">50</span>% of path</strong>
+          </label>
+        </div>
+
+        <div class="grid two-up slider-grid compact-sliders section-gap">
+          <label class="input-card">
+            <span>Gateway TX power</span>
+            <input id="gatewayTx" type="range" step="0.5" />
+            <strong><span id="gatewayTxValue">0</span> dBm</strong>
+            <div id="gatewayTxWarning" class="warning-banner hidden"></div>
+          </label>
+          <label class="input-card">
+            <span>End-device TX power</span>
+            <input id="deviceTx" type="range" step="0.5" />
+            <strong><span id="deviceTxValue">0</span> dBm</strong>
+          </label>
+          <label class="input-card">
+            <span>GW antenna gain</span>
+            <input id="gatewayGain" type="range" step="0.5" />
+            <strong><span id="gatewayGainValue">0</span> dBi</strong>
+          </label>
+          <label class="input-card relay-only">
+            <span>Relay TX power</span>
+            <input id="relayTx" type="range" step="0.5" />
+            <strong><span id="relayTxValue">0</span> dBm</strong>
+          </label>
+          <label class="input-card relay-only">
+            <span>Relay antenna gain</span>
+            <input id="relayGain" type="range" step="0.5" />
+            <strong><span id="relayGainValue">0</span> dBi</strong>
+          </label>
+          <label class="input-card">
+            <span>GW RX sensitivity</span>
+            <input id="gatewaySensitivity" type="range" step="0.5" />
+            <strong><span id="gatewaySensitivityValue">0</span> dBm</strong>
+          </label>
+          <label class="input-card relay-only">
+            <span>Relay RX sensitivity</span>
+            <input id="relaySensitivity" type="range" step="0.5" />
+            <strong><span id="relaySensitivityValue">0</span> dBm</strong>
+          </label>
+        </div>
+      </section>
+
+      <section class="visual-panel card">
+        <div class="section-title-row">
+          <h2>Coverage view</h2>
+          <p id="scenarioLabel" class="scenario-label"></p>
+        </div>
+
+        <div class="map-stage">
+          <canvas id="coverageCanvas" width="960" height="680" aria-label="Coverage map"></canvas>
+          <div class="map-legend map-legend-right">
+            <div><span class="swatch gateway"></span> Gateway coverage</div>
+            <div class="relay-only"><span class="swatch relay"></span> Relay coverage</div>
+            <div><span class="swatch total"></span> Estimated total reach</div>
+          </div>
+        </div>
+
+        <div class="metrics-grid">
+          <article class="metric-card">
+            <span id="legAPathLossLabel">Leg A path loss</span>
+            <strong id="legAPathLoss">0 dB</strong>
+            <small id="legASubtitle">Device -> Relay</small>
+          </article>
+          <article class="metric-card">
+            <span id="legBPathLossLabel">Leg B path loss</span>
+            <strong id="legBPathLoss">0 dB</strong>
+            <small id="legBSubtitle">Relay -> Gateway</small>
+          </article>
+          <article class="metric-card">
+            <span id="legADistanceLabel">Leg A estimate</span>
+            <strong id="legADistance">0 km</strong>
+            <small>Usable design reach</small>
+          </article>
+          <article class="metric-card">
+            <span id="legBDistanceLabel">Leg B estimate</span>
+            <strong id="legBDistance">0 km</strong>
+            <small>Usable design reach</small>
+          </article>
+        </div>
+
+        <div class="insight-box" id="insightBox"></div>
+
+        <section class="notes-panel card notes-card">
+          <div class="section-title-row mini-title">
+            <h3>Notes and assumptions</h3>
+          </div>
+          <div id="notesBox" class="notes-grid"></div>
+        </section>
+      </section>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
