@@ -1,6 +1,7 @@
-import { useReducer, useRef, useEffect } from 'react'
+import { useRef, useEffect, useState } from 'react'
 import { presets, computeResults, getInitialSliderValues, formatDistance, formatDb } from '../lib/lorawan.js'
 import { drawMap } from '../lib/drawMap.js'
+import { useShareableState } from '../hooks/useShareableState.js'
 import './RangeEstimator.css'
 
 function getInitialState() {
@@ -34,8 +35,15 @@ function reducer(state, action) {
 }
 
 export default function RangeEstimator() {
-  const [state, dispatch] = useReducer(reducer, undefined, getInitialState)
+  const [state, dispatch] = useShareableState(reducer, getInitialState)
+  const [copied, setCopied] = useState(false)
   const canvasRef = useRef(null)
+
+  function handleCopy() {
+    navigator.clipboard.writeText(window.location.href)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 1500)
+  }
 
   const results = computeResults(state)
   const sliderCfg = presets.region[state.region].sliders
@@ -88,6 +96,13 @@ export default function RangeEstimator() {
             <span>Estimated total reach</span>
             <strong>{formatDistance(results.totalReach)}</strong>
           </div>
+          <button className={`re-copy-btn${copied ? ' re-copy-btn-success' : ''}`} onClick={handleCopy}>
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M6 4H4a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-2" />
+              <rect x="6" y="2" width="7" height="7" rx="1" />
+            </svg>
+            {copied ? 'Copied!' : 'Copy link'}
+          </button>
         </div>
       </header>
 

@@ -46,6 +46,38 @@
   gap: 12px;
 }
 
+.re-copy-btn {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 10px 16px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+  color: #9fb1c8;
+  font-size: 0.84rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.re-copy-btn svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+.re-copy-btn:hover {
+  background: rgba(115, 210, 255, 0.1);
+  border-color: rgba(115, 210, 255, 0.35);
+  color: #e9f1fb;
+}
+.re-copy-btn-success {
+  background: rgba(158, 255, 181, 0.1) !important;
+  border-color: rgba(158, 255, 181, 0.35) !important;
+  color: #9effb5 !important;
+}
+
 /* ── Cards ────────────────────────────────────────────────────────── */
 .re-card,
 .re-stat-card,
