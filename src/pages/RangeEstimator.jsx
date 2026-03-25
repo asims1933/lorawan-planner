@@ -57,7 +57,6 @@ export default function RangeEstimator() {
         designB: results.designB,
         totalReach: results.totalReach,
         limitingLeg: results.limitingLeg,
-        relayPlacement: state.relayPlacement,
         gatewayHeight: state.gatewayHeight,
         relayHeight: state.relayHeight,
         deviceHeight: state.deviceHeight,

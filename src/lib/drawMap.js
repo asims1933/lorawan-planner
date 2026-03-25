@@ -1,13 +1,14 @@
 import { formatDistance, radioHorizonKm } from './lorawan.js'
 
-function drawRangeRings(ctx, cx, cy, radius, fill, stroke) {
+function drawRangeRings(ctx, cx, cy, radius, fill, stroke, strokeOuter) {
   for (let i = 1; i <= 3; i++) {
     const r = radius * (i / 3)
     ctx.beginPath()
     ctx.arc(cx, cy, r, 0, Math.PI * 2)
     ctx.fillStyle = fill
-    ctx.strokeStyle = stroke
-    ctx.lineWidth = 1.3
+    // Outermost ring gets a brighter border — this is where the next node sits
+    ctx.strokeStyle = i === 3 ? strokeOuter : stroke
+    ctx.lineWidth = i === 3 ? 2 : 1.2
     ctx.fill()
     ctx.stroke()
   }
@@ -26,10 +27,12 @@ function drawNode(ctx, x, y, radius, color, label) {
   ctx.stroke()
   const [l1, l2] = label.split('\n')
   ctx.fillStyle = '#f4f8fd'
-  ctx.font = '700 15px Inter, sans-serif'
-  ctx.fillText(l1, x - 22, y + 34)
-  ctx.font = '500 13px Inter, sans-serif'
-  ctx.fillText(l2, x - 16, y + 52)
+  ctx.font = '700 14px Inter, sans-serif'
+  ctx.textAlign = 'center'
+  ctx.fillText(l1, x, y + 34)
+  ctx.font = '500 12px Inter, sans-serif'
+  ctx.fillText(l2, x, y + 50)
+  ctx.textAlign = 'left'
 }
 
 function drawTerrain(ctx) {
@@ -61,12 +64,14 @@ function drawScale(ctx, w, h, maxVisualKm, pxPerKm) {
     const km = ((x - x0) / pxPerKm).toFixed(0)
     ctx.fillStyle = 'rgba(233,241,251,0.8)'
     ctx.font = '500 12px Inter, sans-serif'
-    ctx.fillText(`${km} km`, x - 10, y - 14)
+    ctx.textAlign = 'center'
+    ctx.fillText(`${km} km`, x, y - 14)
   }
+  ctx.textAlign = 'left'
 }
 
 export function drawMap(canvas, {
-  terrain, designA, designB, totalReach, relayPlacement,
+  terrain, designA, designB, totalReach,
   gatewayHeight, relayHeight, deviceHeight, useRelay, limitingLeg,
 }) {
   const ctx = canvas.getContext('2d')
@@ -78,59 +83,69 @@ export function drawMap(canvas, {
   gradient.addColorStop(1, '#08111d')
   ctx.fillStyle = gradient
   ctx.fillRect(0, 0, w, h)
-
   drawTerrain(ctx)
 
-  const margin = 90, gatewayX = 180, gatewayY = h / 2 - 40
+  const margin = 90, gatewayX = 180
+  // All nodes share the same Y — chain reads left-to-right
+  const nodeY = h / 2 - 50
 
-  // Anchor scale to the radio horizon so rings visibly expand/contract
-  // as signal parameters change rather than auto-scaling to fill the canvas.
+  // Horizon-anchored scale: rings expand/contract as signal params change
   const refHorizon = radioHorizonKm(gatewayHeight, deviceHeight)
   const maxVisualKm = Math.max(refHorizon * 1.15, totalReach * 1.18, 1)
   const pxPerKm = (w - margin * 2) / maxVisualKm
 
-  // Relay sits at relayPlacement% of total path; device at full total reach.
-  const relayX = Math.min(w - margin - 60, gatewayX + (relayPlacement / 100) * totalReach * pxPerKm)
-  const relayY = h / 2 + 80
+  // Chain positions:
+  //   relay sits on the edge of the gateway's ring (at designB from gateway)
+  //   device sits on the edge of the relay's ring (at designA from relay = totalReach from gateway)
+  const relayX = Math.min(w - margin - 80, gatewayX + designB * pxPerKm)
   const deviceX = Math.min(w - margin - 20, gatewayX + totalReach * pxPerKm)
-  const deviceY = h / 2 - 10
 
+  // Rings — outer border brighter to show where the next node sits
   if (useRelay) {
-    drawRangeRings(ctx, gatewayX, gatewayY, designB * pxPerKm, 'rgba(120,211,255,0.14)', 'rgba(120,211,255,0.36)')
-    drawRangeRings(ctx, relayX, relayY, designA * pxPerKm, 'rgba(158,255,181,0.14)', 'rgba(158,255,181,0.34)')
+    drawRangeRings(ctx, gatewayX, nodeY, designB * pxPerKm,
+      'rgba(120,211,255,0.08)', 'rgba(120,211,255,0.22)', 'rgba(120,211,255,0.7)')
+    drawRangeRings(ctx, relayX, nodeY, designA * pxPerKm,
+      'rgba(158,255,181,0.08)', 'rgba(158,255,181,0.20)', 'rgba(158,255,181,0.65)')
   } else {
-    drawRangeRings(ctx, gatewayX, gatewayY, designA * pxPerKm, 'rgba(120,211,255,0.14)', 'rgba(120,211,255,0.36)')
+    drawRangeRings(ctx, gatewayX, nodeY, designA * pxPerKm,
+      'rgba(120,211,255,0.10)', 'rgba(120,211,255,0.25)', 'rgba(120,211,255,0.7)')
   }
 
-  ctx.setLineDash([12, 10])
-  ctx.strokeStyle = 'rgba(255,213,106,0.9)'
-  ctx.lineWidth = 3
+  // Dashed path line along the chain
+  ctx.setLineDash([10, 8])
+  ctx.strokeStyle = 'rgba(255,213,106,0.7)'
+  ctx.lineWidth = 2.5
   ctx.beginPath()
-  ctx.moveTo(gatewayX, gatewayY)
-  if (useRelay) ctx.lineTo(relayX, relayY)
-  ctx.lineTo(deviceX, deviceY)
+  ctx.moveTo(gatewayX, nodeY)
+  if (useRelay) ctx.lineTo(relayX, nodeY)
+  ctx.lineTo(deviceX, nodeY)
   ctx.stroke()
   ctx.setLineDash([])
 
-  drawNode(ctx, gatewayX, gatewayY, 18, '#78d3ff', `Gateway\n${Math.round(gatewayHeight)}m`)
-  if (useRelay) drawNode(ctx, relayX, relayY, 14, '#9effb5', `Relay\n${Math.round(relayHeight)}m`)
-  drawNode(ctx, deviceX, deviceY, 10, '#ffd56a', `Device\n${deviceHeight.toFixed(1)}m`)
-
-  ctx.fillStyle = 'rgba(233,241,251,0.95)'
-  ctx.font = '600 16px Inter, sans-serif'
+  // Leg distance labels centered above each segment
+  ctx.fillStyle = 'rgba(233,241,251,0.85)'
+  ctx.font = '600 14px Inter, sans-serif'
+  ctx.textAlign = 'center'
   if (useRelay) {
-    ctx.fillText(`Leg B: ${formatDistance(designB)}`, gatewayX + 24, gatewayY - 24)
-    ctx.fillText(`Leg A: ${formatDistance(designA)}`, relayX + 20, relayY - 18)
+    ctx.fillText(`Leg B  ${formatDistance(designB)}`, (gatewayX + relayX) / 2, nodeY - 18)
+    ctx.fillText(`Leg A  ${formatDistance(designA)}`, (relayX + deviceX) / 2, nodeY - 18)
   } else {
-    ctx.fillText(`Direct: ${formatDistance(designA)}`, gatewayX + 24, gatewayY - 24)
+    ctx.fillText(`Direct  ${formatDistance(designA)}`, (gatewayX + deviceX) / 2, nodeY - 18)
   }
+  ctx.textAlign = 'left'
 
-  ctx.font = '700 18px Inter, sans-serif'
+  // Nodes (drawn after rings so they sit on top)
+  drawNode(ctx, gatewayX, nodeY, 18, '#78d3ff', `Gateway\n${Math.round(gatewayHeight)}m`)
+  if (useRelay) drawNode(ctx, relayX, nodeY, 14, '#9effb5', `Relay\n${Math.round(relayHeight)}m`)
+  drawNode(ctx, deviceX, nodeY, 10, '#ffd56a', `Device\n${deviceHeight.toFixed(1)}m`)
+
+  // Summary — top left
+  ctx.font = '700 17px Inter, sans-serif'
   ctx.fillStyle = 'rgba(233,241,251,0.95)'
   ctx.fillText(`Estimated total: ${formatDistance(totalReach)}`, 28, 36)
-  ctx.font = '600 15px Inter, sans-serif'
+  ctx.font = '600 14px Inter, sans-serif'
   ctx.fillStyle = limitingLeg === 'Leg A' ? '#9effb5' : '#78d3ff'
-  ctx.fillText(`${limitingLeg} is limiting`, 28, 62)
+  ctx.fillText(`${limitingLeg} is limiting`, 28, 60)
 
   drawScale(ctx, w, h, maxVisualKm, pxPerKm)
 }
