@@ -1,0 +1,420 @@
+/* ── Layout shell ─────────────────────────────────────────────────── */
+.re-shell {
+  max-width: 1480px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+/* ── Hero ─────────────────────────────────────────────────────────── */
+.re-hero {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr;
+  gap: 20px;
+  align-items: end;
+  margin-bottom: 20px;
+}
+.re-eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: #73d2ff;
+  font-size: 12px;
+  margin: 0 0 10px;
+}
+.re-h1 {
+  margin: 0 0 12px;
+  font-size: clamp(1.6rem, 3vw, 3rem);
+  line-height: 1;
+}
+.re-subtitle {
+  margin: 0;
+  max-width: 760px;
+  color: #9fb1c8;
+  font-size: 1rem;
+  line-height: 1.6;
+}
+.re-hero-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+/* ── Cards ────────────────────────────────────────────────────────── */
+.re-card,
+.re-stat-card,
+.re-metric-card,
+.re-input-card {
+  background: rgba(14, 24, 38, 0.88);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 24px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+}
+.re-stat-card {
+  padding: 18px;
+}
+.re-stat-card span,
+.re-metric-card span,
+.re-input-card span,
+.re-toggle-help,
+.re-scenario-label,
+.re-insight-box {
+  display: block;
+  color: #9fb1c8;
+  font-size: 0.86rem;
+  margin-bottom: 8px;
+}
+.re-stat-card strong {
+  font-size: 1.3rem;
+}
+
+/* ── Main two-column layout ───────────────────────────────────────── */
+.re-layout {
+  display: grid;
+  grid-template-columns: 420px 1fr;
+  gap: 20px;
+}
+.re-controls,
+.re-visual {
+  padding: 20px;
+}
+
+/* ── Section title row ────────────────────────────────────────────── */
+.re-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+.re-mini-title {
+  margin-top: 14px;
+  margin-bottom: 12px;
+}
+.re-title-row h2,
+.re-title-row h3,
+.re-title-row h4 {
+  margin: 0;
+}
+
+/* ── Ghost button ─────────────────────────────────────────────────── */
+.re-ghost-btn {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.03);
+  color: #e9f1fb;
+  border-radius: 999px;
+  padding: 10px 14px;
+  font-weight: 700;
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+.re-ghost-btn:hover {
+  background: rgba(255, 255, 255, 0.07);
+}
+
+/* ── Control blocks ───────────────────────────────────────────────── */
+.re-control-block {
+  margin-bottom: 18px;
+}
+.re-block-label {
+  display: block;
+  margin-bottom: 10px;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+/* ── Chip groups ──────────────────────────────────────────────────── */
+.re-chip-group {
+  display: flex;
+  gap: 10px;
+}
+.re-chip-wrap {
+  flex-wrap: wrap;
+}
+.re-chip {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.03);
+  color: #e9f1fb;
+  padding: 10px 14px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 0.85rem;
+  transition: background 0.15s, border-color 0.15s;
+}
+.re-chip.active {
+  background: linear-gradient(135deg, rgba(115, 210, 255, 0.28), rgba(158, 255, 181, 0.18));
+  border-color: rgba(115, 210, 255, 0.55);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04), 0 8px 24px rgba(115, 210, 255, 0.16);
+}
+
+/* ── Toggle ───────────────────────────────────────────────────────── */
+.re-toggle-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.9rem;
+}
+.re-switch {
+  position: relative;
+  display: inline-block;
+  width: 64px;
+  height: 36px;
+  flex-shrink: 0;
+}
+.re-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.re-slider {
+  position: absolute;
+  inset: 0;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  transition: background 0.2s;
+}
+.re-slider::before {
+  content: '';
+  position: absolute;
+  width: 28px;
+  height: 28px;
+  left: 4px;
+  top: 4px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  transition: transform 0.2s;
+}
+.re-switch input:checked + .re-slider {
+  background: linear-gradient(135deg, rgba(115, 210, 255, 0.7), rgba(158, 255, 181, 0.58));
+}
+.re-switch input:checked + .re-slider::before {
+  transform: translateX(28px);
+}
+.re-toggle-help {
+  margin-top: 8px;
+  margin-bottom: 0;
+}
+
+/* ── Grid ─────────────────────────────────────────────────────────── */
+.re-grid.re-two-up {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.re-section-gap {
+  margin-top: 12px;
+}
+
+/* ── Input cards (sliders) ────────────────────────────────────────── */
+.re-input-card {
+  display: block;
+  padding: 14px;
+  cursor: default;
+}
+.re-input-card strong {
+  display: block;
+  margin-top: 8px;
+  font-size: 1rem;
+}
+.re-input-card input[type='range'] {
+  width: 100%;
+  appearance: none;
+  -webkit-appearance: none;
+  height: 6px;
+  border-radius: 999px;
+  background: transparent;
+  outline: none;
+  margin: 10px 0 8px;
+  cursor: pointer;
+}
+.re-input-card input[type='range']::-webkit-slider-thumb {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fff;
+  border: 0;
+  box-shadow: 0 0 0 4px rgba(115, 210, 255, 0.18);
+  margin-top: -6px;
+}
+.re-input-card input[type='range']::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fff;
+  border: 0;
+  box-shadow: 0 0 0 4px rgba(115, 210, 255, 0.18);
+}
+.re-input-card input[type='range']::-webkit-slider-runnable-track {
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.14);
+}
+.re-input-card input[type='range']::-moz-range-track {
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.14);
+}
+.re-input-card input[type='range']::-moz-range-progress {
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(115, 210, 255, 0.32);
+}
+
+/* ── Warning banner ───────────────────────────────────────────────── */
+.re-warning-banner {
+  display: block;
+  margin-top: 10px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: rgba(255, 213, 106, 0.14);
+  border: 1px solid rgba(255, 213, 106, 0.35);
+  color: #ffe7a7;
+  font-size: 0.82rem;
+  line-height: 1.4;
+}
+
+/* ── Map stage ────────────────────────────────────────────────────── */
+.re-map-stage {
+  position: relative;
+  border-radius: 28px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: linear-gradient(180deg, rgba(27, 47, 73, 0.8), rgba(8, 16, 28, 0.95));
+}
+.re-map-stage canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 960 / 680;
+}
+.re-map-legend {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  display: grid;
+  gap: 8px;
+  background: rgba(8, 16, 28, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 18px;
+  padding: 12px 14px;
+  backdrop-filter: blur(12px);
+  font-size: 0.84rem;
+  color: #e9f1fb;
+  z-index: 2;
+}
+.re-swatch {
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  display: inline-block;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+.re-swatch-gw    { background: #78d3ff; }
+.re-swatch-relay { background: #9effb5; }
+.re-swatch-total { background: #ffd56a; }
+
+/* ── Metrics grid ─────────────────────────────────────────────────── */
+.re-metrics-grid {
+  margin-top: 16px;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+.re-metric-card {
+  padding: 16px;
+}
+.re-metric-card strong {
+  display: block;
+  font-size: 1.5rem;
+  margin-bottom: 6px;
+}
+.re-metric-card small {
+  color: #9fb1c8;
+  font-size: 0.8rem;
+}
+
+/* ── Insight box ──────────────────────────────────────────────────── */
+.re-insight-box {
+  margin-top: 16px;
+  padding: 16px 18px;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+  line-height: 1.6;
+  font-size: 0.9rem;
+  color: #9fb1c8;
+}
+.re-insight-box strong {
+  color: #e9f1fb;
+}
+
+/* ── Notes panel ──────────────────────────────────────────────────── */
+.re-notes-card {
+  margin-top: 16px;
+}
+.re-notes-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.re-note-block {
+  padding: 14px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+.re-note-block h4 {
+  margin: 0 0 10px;
+  font-size: 0.85rem;
+  color: #e9f1fb;
+}
+.re-note-block dl {
+  margin: 0;
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 8px 10px;
+  font-size: 0.82rem;
+}
+.re-note-block dt {
+  color: #9fb1c8;
+}
+.re-note-block dd {
+  margin: 0;
+  text-align: right;
+  color: #e9f1fb;
+}
+.re-formula-box {
+  white-space: pre-line;
+  line-height: 1.5;
+  color: #e9f1fb;
+  opacity: 0.92;
+  font-size: 0.82rem;
+}
+
+/* ── Responsive ───────────────────────────────────────────────────── */
+@media (max-width: 1180px) {
+  .re-layout,
+  .re-hero {
+    grid-template-columns: 1fr;
+  }
+  .re-notes-grid,
+  .re-metrics-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 700px) {
+  .re-shell { padding: 14px; }
+  .re-hero-stats,
+  .re-grid.re-two-up,
+  .re-metrics-grid,
+  .re-notes-grid {
+    grid-template-columns: 1fr;
+  }
+  .re-chip-group {
+    flex-wrap: wrap;
+  }
+}
