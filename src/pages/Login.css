@@ -1,0 +1,110 @@
+.login-shell {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-primary);
+}
+
+.login-card {
+  width: 100%;
+  max-width: 380px;
+  padding: 40px 36px;
+  background: rgba(14, 24, 38, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 28px;
+  box-shadow: 0 32px 80px rgba(0, 0, 0, 0.5);
+}
+
+.login-eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: #73d2ff;
+  font-size: 11px;
+  margin: 0 0 12px;
+}
+
+.login-title {
+  margin: 0 0 32px;
+  font-size: 1.5rem;
+  line-height: 1.2;
+  color: var(--text-primary);
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.login-input-wrap {
+  position: relative;
+}
+
+.login-input {
+  width: 100%;
+  padding: 12px 42px 12px 14px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  color: var(--text-primary);
+  font-size: 0.95rem;
+  outline: none;
+  transition: border-color 0.15s;
+  box-sizing: border-box;
+}
+
+.login-input::placeholder {
+  color: #5a7090;
+}
+
+.login-input:focus {
+  border-color: rgba(115, 210, 255, 0.5);
+}
+
+.login-input-error {
+  border-color: rgba(255, 100, 100, 0.5) !important;
+}
+
+.login-eye {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  padding: 2px;
+  cursor: pointer;
+  color: #5a7090;
+  display: flex;
+  align-items: center;
+  transition: color 0.15s;
+}
+.login-eye:hover { color: #9fb1c8; }
+.login-eye svg {
+  width: 18px;
+  height: 18px;
+}
+
+.login-error {
+  margin: 0;
+  font-size: 0.82rem;
+  color: #ff8080;
+}
+
+.login-btn {
+  padding: 12px;
+  background: linear-gradient(135deg, rgba(115, 210, 255, 0.28), rgba(158, 255, 181, 0.18));
+  border: 1px solid rgba(115, 210, 255, 0.45);
+  border-radius: 12px;
+  color: #e9f1fb;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.login-btn:hover {
+  background: linear-gradient(135deg, rgba(115, 210, 255, 0.38), rgba(158, 255, 181, 0.28));
+  border-color: rgba(115, 210, 255, 0.65);
+}

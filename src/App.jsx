@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Routes, Route, NavLink } from 'react-router-dom'
 import RangeEstimator from './pages/RangeEstimator.jsx'
+import Login from './pages/Login.jsx'
 import './App.css'
 
 const NAV_ITEMS = [
@@ -66,6 +67,14 @@ const NAV_ITEMS = [
 
 export default function App() {
   const [collapsed, setCollapsed] = useState(true)
+  const [authed, setAuthed] = useState(() => sessionStorage.getItem('spektra-authed') === '1')
+
+  function handleLogin() {
+    sessionStorage.setItem('spektra-authed', '1')
+    setAuthed(true)
+  }
+
+  if (!authed) return <Login onLogin={handleLogin} />
 
   return (
     <div className="app-layout">

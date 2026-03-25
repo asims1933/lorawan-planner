@@ -35,13 +35,13 @@ function drawNode(ctx, x, y, radius, color, label) {
   ctx.textAlign = 'left'
 }
 
-function drawTerrain(ctx) {
+function drawTerrain(ctx, h) {
   ctx.save()
   ctx.globalAlpha = 0.55
   ctx.fillStyle = 'rgba(255,255,255,0.05)'
   for (let i = 0; i < 14; i++) {
     const x = 50 + i * 68
-    const y = 510 + Math.sin(i * 0.75) * 18
+    const y = (h - 170) + Math.sin(i * 0.75) * 18
     ctx.beginPath()
     ctx.moveTo(x, y)
     ctx.lineTo(x + 20, y - 60)
@@ -61,11 +61,12 @@ function drawScale(ctx, w, h, maxVisualKm, pxPerKm) {
   for (let i = 0; i <= steps; i++) {
     const x = x0 + ((x1 - x0) / steps) * i
     ctx.beginPath(); ctx.moveTo(x, y - 8); ctx.lineTo(x, y + 8); ctx.stroke()
-    const km = ((x - x0) / pxPerKm).toFixed(0)
+    const km = (x - x0) / pxPerKm
+    const label = km < 1 ? `${(km * 1000).toFixed(0)} m` : `${km.toFixed(km < 10 ? 1 : 0)} km`
     ctx.fillStyle = 'rgba(233,241,251,0.8)'
     ctx.font = '500 12px Inter, sans-serif'
     ctx.textAlign = 'center'
-    ctx.fillText(`${km} km`, x, y - 14)
+    ctx.fillText(label, x, y - 14)
   }
   ctx.textAlign = 'left'
 }
@@ -83,15 +84,16 @@ export function drawMap(canvas, {
   gradient.addColorStop(1, '#08111d')
   ctx.fillStyle = gradient
   ctx.fillRect(0, 0, w, h)
-  drawTerrain(ctx)
+  drawTerrain(ctx, h)
 
   const margin = 90, gatewayX = 180
   // All nodes share the same Y — chain reads left-to-right
   const nodeY = h / 2 - 50
 
-  // Horizon-anchored scale: rings expand/contract as signal params change
+  // Scale: zoom to fit totalReach (×2.5 headroom), but cap at the radio horizon
+  // so rings still move when signal params change in high-reach scenarios.
   const refHorizon = radioHorizonKm(gatewayHeight, deviceHeight)
-  const maxVisualKm = Math.max(refHorizon * 1.15, totalReach * 1.18, 1)
+  const maxVisualKm = Math.min(refHorizon * 1.15, Math.max(totalReach * 2.5, 0.5))
   const pxPerKm = (w - margin * 2) / maxVisualKm
 
   // Chain positions:
@@ -135,9 +137,9 @@ export function drawMap(canvas, {
   ctx.textAlign = 'left'
 
   // Nodes (drawn after rings so they sit on top)
-  drawNode(ctx, gatewayX, nodeY, 18, '#78d3ff', `Gateway\n${Math.round(gatewayHeight)}m`)
-  if (useRelay) drawNode(ctx, relayX, nodeY, 14, '#9effb5', `Relay\n${Math.round(relayHeight)}m`)
-  drawNode(ctx, deviceX, nodeY, 10, '#ffd56a', `Device\n${deviceHeight.toFixed(1)}m`)
+  drawNode(ctx, gatewayX, nodeY, 18, '#78d3ff', `Gateway\nh = ${Math.round(gatewayHeight)}m`)
+  if (useRelay) drawNode(ctx, relayX, nodeY, 14, '#9effb5', `Relay\nh = ${Math.round(relayHeight)}m`)
+  drawNode(ctx, deviceX, nodeY, 10, '#ffd56a', `Device\nh = ${deviceHeight.toFixed(1)}m`)
 
   // Summary — top left
   ctx.font = '700 17px Inter, sans-serif'

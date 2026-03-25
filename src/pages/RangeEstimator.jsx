@@ -11,10 +11,10 @@ function getInitialState() {
     gateway: 'Macro',
     terrain: 'open',
     useRelay: false,
-    gatewayHeight: 30,
-    relayHeight: 6,
+    gatewayHeight: 10,
+    relayHeight: 2,
     deviceHeight: 1.5,
-    relayPlacement: 50,
+    relayPlacement: 65,
     ...sliders,
   }
 }
@@ -50,8 +50,15 @@ export default function RangeEstimator() {
   const terrain = presets.terrain[state.terrain]
 
   useEffect(() => {
-    if (canvasRef.current) {
-      drawMap(canvasRef.current, {
+    const canvas = canvasRef.current
+    if (!canvas) return
+
+    function draw() {
+      const { width, height } = canvas.getBoundingClientRect()
+      if (!width) return
+      canvas.width = Math.round(width)
+      canvas.height = Math.round(height)
+      drawMap(canvas, {
         terrain: results.terrain,
         designA: results.designA,
         designB: results.designB,
@@ -63,11 +70,19 @@ export default function RangeEstimator() {
         useRelay: state.useRelay,
       })
     }
+
+    draw()
+    window.addEventListener('resize', draw)
+    return () => window.removeEventListener('resize', draw)
   })
 
   function set(key) {
     return e => dispatch({ type: 'SET', key, value: parseFloat(e.target.value) })
   }
+
+  const relayGainWarning = state.region === 'EU868' && state.relayGain > 2.15
+    ? 'Exceeds EU868 ETSI regulatory maximum of +2.15 dBi'
+    : null
 
   const scenarioLabel = `${state.region} · ${state.gateway} · ${terrain.label} · ${state.useRelay ? 'Gateway + Relay' : 'Gateway'}`
 
@@ -76,7 +91,7 @@ export default function RangeEstimator() {
       <header className="re-hero">
         <div>
           <p className="re-eyebrow">Local planning tool</p>
-          <h1 className="re-h1">LoRaWAN Relay Visual Planner</h1>
+          <h1 className="re-h1">LoRaWAN Range Estimator</h1>
           <p className="re-subtitle">
             Compare KONA Macro and Mega, change terrain and antenna assumptions, and visualize
             device, relay, and gateway coverage as concentric range rings.
@@ -84,7 +99,21 @@ export default function RangeEstimator() {
         </div>
         <div className="re-hero-stats">
           <div className="re-stat-card">
-            <span>Limiting link</span>
+            <span>
+              Limiting link
+              <span className="re-tooltip-wrap">
+                <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+                  <circle cx="8" cy="8" r="7" />
+                  <line x1="8" y1="7.5" x2="8" y2="11" />
+                  <circle cx="8" cy="5.2" r="0.6" fill="currentColor" stroke="none" />
+                </svg>
+                <span className="re-tooltip-box">
+                  {state.useRelay
+                    ? <><strong>The weaker of the two hops.</strong> Leg A (Device → Relay) and Leg B (Relay → Gateway) each have a maximum range. Whichever is shorter limits the total reach — improving the other leg won't help until this one is addressed.</>
+                    : <><strong>Direct gateway-to-device link.</strong> Only one hop, so there's nothing to compare.</>}
+                </span>
+              </span>
+            </span>
             <strong>{results.limitingLeg}</strong>
           </div>
           <div className="re-stat-card">
@@ -173,56 +202,29 @@ export default function RangeEstimator() {
             </p>
           </div>
 
-          <div className="re-grid re-two-up">
-            <SliderCard label="Gateway antenna height" unit="m" value={state.gatewayHeight} min={5} max={80} step={1} onChange={set('gatewayHeight')} />
-            {state.useRelay && <SliderCard label="Relay antenna height" unit="m" value={state.relayHeight} min={1} max={25} step={1} onChange={set('relayHeight')} />}
-            <SliderCard label="End-device height" unit="m" value={state.deviceHeight} min={0.5} max={8} step={0.5} onChange={set('deviceHeight')} />
-            {state.useRelay && <SliderCard label="Relay placement" unit="% of path" value={state.relayPlacement} min={20} max={80} step={1} onChange={set('relayPlacement')} />}
+          <div className="re-slider-group">
+            <div className="re-group-label">Gateway</div>
+            <SliderCard label="Height" unit="m" value={state.gatewayHeight} min={5} max={80} step={1} onChange={set('gatewayHeight')} />
+            <SliderCard label="TX power" unit="dBm" value={state.gatewayTx} min={sliderCfg.gatewayTx.min} max={sliderCfg.gatewayTx.max} step={0.5} onChange={set('gatewayTx')} warning={results.gatewayTxWarning} />
+            <SliderCard label="Antenna gain" unit="dBi" value={state.gatewayGain} min={sliderCfg.gatewayGain.min} max={sliderCfg.gatewayGain.max} step={0.5} onChange={set('gatewayGain')} />
+            <SliderCard label="RX sensitivity" unit="dBm" value={state.gatewaySensitivity} min={sliderCfg.gatewaySensitivity.min} max={sliderCfg.gatewaySensitivity.max} step={0.5} onChange={set('gatewaySensitivity')} />
           </div>
 
-          <div className="re-grid re-two-up re-section-gap">
-            <SliderCard
-              label="Gateway TX power" unit="dBm"
-              value={state.gatewayTx} min={sliderCfg.gatewayTx.min} max={sliderCfg.gatewayTx.max} step={0.5}
-              onChange={set('gatewayTx')}
-              warning={results.gatewayTxWarning}
-            />
-            <SliderCard
-              label="End-device TX power" unit="dBm"
-              value={state.deviceTx} min={sliderCfg.deviceTx.min} max={sliderCfg.deviceTx.max} step={0.5}
-              onChange={set('deviceTx')}
-            />
-            <SliderCard
-              label="GW antenna gain" unit="dBi"
-              value={state.gatewayGain} min={sliderCfg.gatewayGain.min} max={sliderCfg.gatewayGain.max} step={0.5}
-              onChange={set('gatewayGain')}
-            />
-            {state.useRelay && (
-              <SliderCard
-                label="Relay TX power" unit="dBm"
-                value={state.relayTx} min={sliderCfg.relayTx.min} max={sliderCfg.relayTx.max} step={0.5}
-                onChange={set('relayTx')}
-              />
-            )}
-            {state.useRelay && (
-              <SliderCard
-                label="Relay antenna gain" unit="dBi"
-                value={state.relayGain} min={sliderCfg.relayGain.min} max={sliderCfg.relayGain.max} step={0.5}
-                onChange={set('relayGain')}
-              />
-            )}
-            <SliderCard
-              label="GW RX sensitivity" unit="dBm"
-              value={state.gatewaySensitivity} min={sliderCfg.gatewaySensitivity.min} max={sliderCfg.gatewaySensitivity.max} step={0.5}
-              onChange={set('gatewaySensitivity')}
-            />
-            {state.useRelay && (
-              <SliderCard
-                label="Relay RX sensitivity" unit="dBm"
-                value={state.relaySensitivity} min={sliderCfg.relaySensitivity.min} max={sliderCfg.relaySensitivity.max} step={0.5}
-                onChange={set('relaySensitivity')}
-              />
-            )}
+          {state.useRelay && (
+            <div className="re-slider-group">
+              <div className="re-group-label">Relay</div>
+              <SliderCard label="Placement" unit="% of path" value={state.relayPlacement} min={20} max={80} step={1} onChange={set('relayPlacement')} />
+              <SliderCard label="Height" unit="m" value={state.relayHeight} min={1} max={25} step={1} onChange={set('relayHeight')} />
+              <SliderCard label="TX power" unit="dBm" value={state.relayTx} min={sliderCfg.relayTx.min} max={sliderCfg.relayTx.max} step={0.5} onChange={set('relayTx')} />
+              <SliderCard label="Antenna gain" unit="dBi" value={state.relayGain} min={sliderCfg.relayGain.min} max={sliderCfg.relayGain.max} step={0.05} onChange={set('relayGain')} warning={relayGainWarning} />
+              <SliderCard label="RX sensitivity" unit="dBm" value={state.relaySensitivity} min={sliderCfg.relaySensitivity.min} max={sliderCfg.relaySensitivity.max} step={0.5} onChange={set('relaySensitivity')} />
+            </div>
+          )}
+
+          <div className="re-slider-group">
+            <div className="re-group-label">End-device</div>
+            <SliderCard label="Height" unit="m" value={state.deviceHeight} min={0.5} max={8} step={0.5} onChange={set('deviceHeight')} />
+            <SliderCard label="TX power" unit="dBm" value={state.deviceTx} min={sliderCfg.deviceTx.min} max={sliderCfg.deviceTx.max} step={0.5} onChange={set('deviceTx')} />
           </div>
         </section>
 
@@ -293,9 +295,11 @@ function SliderCard({ label, unit, value, min, max, step, onChange, warning }) {
   const display = Number.isInteger(step) ? value : Number(value).toFixed(1)
   return (
     <label className="re-input-card">
-      <span>{label}</span>
+      <div className="re-slider-header">
+        <span>{label}</span>
+        <strong>{display} {unit}</strong>
+      </div>
       <input type="range" min={min} max={max} step={step} value={value} onChange={onChange} />
-      <strong>{display} {unit}</strong>
       {warning && <div className="re-warning-banner">{warning}</div>}
     </label>
   )

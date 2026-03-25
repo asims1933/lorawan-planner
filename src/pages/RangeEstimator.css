@@ -3,9 +3,7 @@
   flex: 1;
   min-height: 0;
   width: 100%;
-  max-width: 1480px;
-  margin: 0 auto;
-  padding: 24px 24px 0;
+  padding: 16px 20px 0;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -16,9 +14,9 @@
 .re-hero {
   display: grid;
   grid-template-columns: 1.6fr 1fr;
-  gap: 20px;
+  gap: 14px;
   align-items: end;
-  margin-bottom: 20px;
+  margin-bottom: 14px;
   flex-shrink: 0;
 }
 .re-eyebrow {
@@ -78,6 +76,51 @@
   color: #9effb5 !important;
 }
 
+/* ── Tooltip ──────────────────────────────────────────────────────── */
+.re-tooltip-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  margin-left: 5px;
+  vertical-align: middle;
+}
+.re-tooltip-wrap svg {
+  width: 13px;
+  height: 13px;
+  color: #9fb1c8;
+  cursor: help;
+  flex-shrink: 0;
+}
+.re-tooltip-box {
+  display: none;
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  transform: none;
+  width: 260px;
+  padding: 11px 13px;
+  background: rgba(10, 18, 30, 0.97);
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  border-radius: 14px;
+  font-size: 0.8rem;
+  font-weight: 400;
+  color: #c8d8ea;
+  line-height: 1.55;
+  z-index: 100;
+  pointer-events: none;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+  white-space: normal;
+  text-align: left;
+}
+.re-tooltip-box strong {
+  color: #e9f1fb;
+  display: block;
+  margin-bottom: 4px;
+}
+.re-tooltip-wrap:hover .re-tooltip-box {
+  display: block;
+}
+
 /* ── Cards ────────────────────────────────────────────────────────── */
 .re-card,
 .re-stat-card,
@@ -91,9 +134,9 @@
 .re-stat-card {
   padding: 18px;
 }
-.re-stat-card span,
-.re-metric-card span,
-.re-input-card span,
+.re-stat-card span:not(.re-tooltip-wrap):not(.re-tooltip-box),
+.re-metric-card span:not(.re-tooltip-wrap):not(.re-tooltip-box),
+.re-input-card span:not(.re-tooltip-wrap):not(.re-tooltip-box),
 .re-toggle-help,
 .re-scenario-label,
 .re-insight-box {
@@ -111,15 +154,15 @@
   flex: 1;
   min-height: 0;
   display: grid;
-  grid-template-columns: 420px 1fr;
-  gap: 20px;
+  grid-template-columns: 520px 1fr;
+  gap: 14px;
   overflow: hidden;
 }
 .re-controls,
 .re-visual {
-  padding: 20px;
+  padding: 16px;
   overflow-y: auto;
-  padding-bottom: 24px;
+  padding-bottom: 20px;
 }
 
 /* Slim dark scrollbars */
@@ -252,23 +295,58 @@
 /* ── Grid ─────────────────────────────────────────────────────────── */
 .re-grid.re-two-up {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
+  grid-template-columns: 1fr;
+  gap: 8px;
 }
 .re-section-gap {
   margin-top: 12px;
 }
 
+/* ── Slider groups ────────────────────────────────────────────────── */
+.re-slider-group {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 18px;
+  padding: 12px 14px 6px;
+  margin-bottom: 10px;
+}
+.re-group-label {
+  font-weight: 700;
+  font-size: 0.82rem;
+  color: #e9f1fb;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.re-slider-group .re-input-card {
+  background: none;
+  border: none;
+  box-shadow: none;
+  border-radius: 0;
+  padding: 6px 0 10px;
+}
+
 /* ── Input cards (sliders) ────────────────────────────────────────── */
 .re-input-card {
   display: block;
-  padding: 14px;
+  padding: 10px 14px 12px;
   cursor: default;
 }
+.re-slider-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 0;
+}
+.re-slider-header span {
+  color: #9fb1c8;
+  font-size: 0.84rem;
+  margin-bottom: 0;
+}
 .re-input-card strong {
-  display: block;
-  margin-top: 8px;
-  font-size: 1rem;
+  font-size: 0.9rem;
+  white-space: nowrap;
 }
 .re-input-card input[type='range'] {
   width: 100%;
@@ -278,7 +356,7 @@
   border-radius: 999px;
   background: transparent;
   outline: none;
-  margin: 10px 0 8px;
+  margin: 8px 0 0;
   cursor: pointer;
 }
 .re-input-card input[type='range']::-webkit-slider-thumb {
@@ -340,8 +418,7 @@
 .re-map-stage canvas {
   display: block;
   width: 100%;
-  height: auto;
-  aspect-ratio: 960 / 680;
+  height: calc(100vh - 400px);
 }
 .re-map-legend {
   position: absolute;
@@ -453,7 +530,7 @@
   .re-shell {
     flex: none;
     overflow: visible;
-    padding: 24px;
+    padding: 16px;
   }
   .re-layout {
     overflow: visible;
@@ -472,7 +549,7 @@
   }
 }
 @media (max-width: 700px) {
-  .re-shell { padding: 14px; }
+  .re-shell { padding: 10px; }
   .re-hero-stats,
   .re-grid.re-two-up,
   .re-metrics-grid,
