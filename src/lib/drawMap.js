@@ -1,4 +1,4 @@
-import { formatDistance } from './lorawan.js'
+import { formatDistance, radioHorizonKm } from './lorawan.js'
 
 function drawRangeRings(ctx, cx, cy, radius, fill, stroke) {
   for (let i = 1; i <= 3; i++) {
@@ -82,15 +82,17 @@ export function drawMap(canvas, {
   drawTerrain(ctx)
 
   const margin = 90, gatewayX = 180, gatewayY = h / 2 - 40
-  const maxVisualKm = Math.max(totalReach, designA, designB, 1) * 1.18
+
+  // Anchor scale to the radio horizon so rings visibly expand/contract
+  // as signal parameters change rather than auto-scaling to fill the canvas.
+  const refHorizon = radioHorizonKm(gatewayHeight, deviceHeight)
+  const maxVisualKm = Math.max(refHorizon * 1.15, totalReach * 1.18, 1)
   const pxPerKm = (w - margin * 2) / maxVisualKm
-  const relayOffsetKm = useRelay ? designB * 0.65 : 0
-  const relayX = Math.min(w - margin - 160, gatewayX + relayOffsetKm * pxPerKm)
+
+  // Relay sits at relayPlacement% of total path; device at full total reach.
+  const relayX = Math.min(w - margin - 60, gatewayX + (relayPlacement / 100) * totalReach * pxPerKm)
   const relayY = h / 2 + 80
-  const deviceOffsetKm = useRelay
-    ? designA * Math.max(0.72, Math.min(1.18, 1 + (relayPlacement / 100 - 0.5) * 0.55))
-    : designA
-  const deviceX = Math.min(w - margin, (useRelay ? relayX : gatewayX) + deviceOffsetKm * pxPerKm)
+  const deviceX = Math.min(w - margin - 20, gatewayX + totalReach * pxPerKm)
   const deviceY = h / 2 - 10
 
   if (useRelay) {
